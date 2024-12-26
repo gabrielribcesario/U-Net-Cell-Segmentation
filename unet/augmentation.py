@@ -1,9 +1,12 @@
 import tensorflow as tf
 
 @tf.function
-def gaussian_filter(size=3, sigma=1.):
+def gaussian_kernel(kSize=3, sigma=1.):
+    """
+    Creates a 2D gaussian kernel using tensorflow.
+    """
     inv_sigmaSqd2 = 1. / (2. * sigma * sigma)
-    uv = tf.linspace(-1., 1., size)
+    uv = tf.linspace(-1., 1., kSize)
     uv *= uv
     uv = tf.reshape(uv, (-1,1)) + tf.reshape(uv, (1,-1))
     kernel = tf.math.exp(-uv * inv_sigmaSqd2) * 0.3183098861837907 * inv_sigmaSqd2
@@ -12,10 +15,9 @@ def gaussian_filter(size=3, sigma=1.):
 @tf.function
 def elastic_deformation(image, alpha=1., sigma=10., kSize=17, auto_kSize=True, order=0, fill_mode="mirror", fill_value=0.):
     """
-    Elastic deformation as described by Simard et al., 2003.
-    Their paper is available at: https://cognitivemedium.com/assets/rmnist/Simard.pdf
+    Elastic deformation as described by Simard et al., 2003. Available at: https://ieeexplore.ieee.org/document/1227801
     
-    image - Input (grayscale) image.
+    image - Grayscale image.
     alpha - Displacement scaling factor.
     sigma - Gaussian kernel std dev.
     kSize - Gaussian kernel size.
@@ -24,28 +26,32 @@ def elastic_deformation(image, alpha=1., sigma=10., kSize=17, auto_kSize=True, o
     fill_mode - Boundary fill mode.
     fill_value - Fill value for fill_mode="constant".
     """
+    image = tf.squeeze(image)
+    h, w = image.shape
+
     if auto_kSize:
         kSize = tf.cast(tf.math.ceil(1. + 2. * (1. + (sigma - 0.8) * 10. / 3.)), tf.int32)
     kSize = tf.math.maximum(kSize, 1)
-    # Image shape and gaussian kernel calculation.
-    image = tf.squeeze(image)
-    h, w = image.shape
+
     # Pixel displacement vectors.
     dx = tf.random.uniform((1, h, w, 1), -1., 1.)
     dy = tf.random.uniform((1, h, w, 1), -1., 1.)
     if kSize > 1:
-        kernel = tf.reshape(gaussian_filter(kSize, sigma), (kSize, kSize, 1, 1))
+        kernel = tf.reshape(gaussian_kernel(kSize, sigma), (kSize, kSize, 1, 1))
         dx = tf.nn.depthwise_conv2d(dx, kernel, (1,1,1,1), "SAME")
         dy = tf.nn.depthwise_conv2d(dy, kernel, (1,1,1,1), "SAME")
     dx = tf.squeeze(dx * alpha)
     dy = tf.squeeze(dy * alpha)
-    # Displacement calculation.s
+
+    # Displacement calculation.
     x, y = tf.meshgrid(tf.range(w, dtype=tf.float32), tf.range(h, dtype=tf.float32))
     return tf.expand_dims(tf.keras.ops.image.map_coordinates(image, [y + dy, x + dx], order=order, fill_mode=fill_mode, fill_value=fill_value), axis=-1)
 
 @tf.function
 def grid_deformation(image, distort_limits=(-0.3, 0.3), grid_size=5, order=0, fill_mode="mirror", fill_value=0.):
     """
+    A tensorflow implementation of the GridDistortion algorithm from Albumentations.
+    See: https://github.com/albumentations-team/albumentations/blob/main/albumentations/augmentations/geometric/transforms.py
     """
     image = tf.squeeze(image)
     h, w = image.shape
