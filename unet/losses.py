@@ -20,7 +20,7 @@ def unet_sample_weights(x, w0=10., sigma=5., data_type=np.float32, use_distance_
     # Calculates the class weights, least frequent classes get larger weights. I'm also normalizing 
     # the sample weights (sw) so that the most common label gets a sw = 1. and the least frequent ones get a sw > 1.
     # The following 2 lines of code can be used for calculating the class frequency for n_classes, btw.
-    unique, idx = np.unique(x, return_inverse=True)
+    unique, idx = np.unique(x.ravel(), return_inverse=True)
     freq_classes = np.bincount(idx) / img_size
     w_c = freq_classes[idx].max() / freq_classes[idx].reshape(img_shape)
     sample_weights += w_c

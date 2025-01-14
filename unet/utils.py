@@ -10,8 +10,8 @@ class UNetHelper:
                  opt_schedule=None
                  ):
         """
-        A helper class meant to be used for training the U-Net. It provides a more convenient way
-        of creating customized distributed training loops.
+        A helper class meant for providing a more convenient way
+        of creating customized distributed training loops for the U-Net.
         """
         # Distributed training strategy.
         self.strategy = strategy
@@ -32,7 +32,7 @@ class UNetHelper:
                                                  UNet(2, **kwargs)])
         self.checkpoint = tf.train.Checkpoint(self.model)
         self.checkpoint_dir = "./models/ckpt/"
-    
+
     @tf.function
     def train_step(self, inputs):
         X, y, sw = inputs
@@ -50,7 +50,7 @@ class UNetHelper:
         gradients = tape.gradient(avg_loss, self.model.trainable_variables)
         self.optimizer.apply_gradients(zip(gradients, self.model.trainable_variables))
         return avg_loss, self.train_sca(y, pred)
-    
+
     @tf.function
     def val_step(self, inputs):
         X, y = inputs
@@ -60,7 +60,7 @@ class UNetHelper:
         obj_loss = self.loss_func(y, pred)
         avg_loss = tf.nn.compute_average_loss(obj_loss) / tf.cast(tf.math.reduce_prod(obj_loss.shape[1:]), tf.float32)
         return avg_loss, self.val_sca(y, pred)
-    
+
     @tf.function
     def dist_train_step(self, inputs):
         out = self.strategy.run(self.train_step, args=[inputs])
