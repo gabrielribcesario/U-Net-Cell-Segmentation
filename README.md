@@ -10,5 +10,7 @@ I'm pretty much using the same network architecture as described in the [origina
 
 The original training dataset is composed of two different recordings. I used each of the recordings as a training-validation pair in a round-robin fashion, basically GroupKFold cross-validation. The results were:
 
-- Average out-of-fold IoU: 0.818561
-- Average out-of-fold dice loss: 0.117192
+- Average out-of-fold IoU: 0.833001
+- Average out-of-fold dice loss: 0.162948
+
+I'm yet to submit my results to the Cell Tracking Challenge organizers.

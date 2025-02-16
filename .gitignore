@@ -1,8 +1,8 @@
 /**/.vscode
 /**/__pycache__
 /**/.ipynb_checkpoints
-/**/ckpt/
 /**/DIC-C2DH-Hela*/
-/**/models/
-/CellSegmentationISBI2012.ipynb
+/models/
+/HeLa/TFCache/
+/HeLa/TFRecords/
 /DIC-C2DH-HeLa*

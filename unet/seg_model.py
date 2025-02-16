@@ -56,7 +56,7 @@ class UNet(tf.keras.layers.Layer):
         ### Encoder ###
         # 1st step
         self.ds1 = UNet_SegBlock(64, param)
-        self.identity1 = Activation('linear') # (reusing the same Activation/using an = sign) might (overwrite past gradients/create a reference of the original tensor), which is why I'm creating an (attribute/tensor) for each (identity/residual)
+        self.identity1 = Activation('linear')
         self.mp1 = MaxPooling2D((2,2))
         # 2nd step
         self.ds2 = UNet_SegBlock(128, param)
@@ -99,10 +99,7 @@ class UNet(tf.keras.layers.Layer):
 
         ## Thresholding ###
         param['kernel_initializer'] = 'GlorotNormal'; 
-        if self.output_maps == 1: 
-            param['activation'] = 'sigmoid'
-        else: 
-            param['activation'] = output_act
+        param['activation'] = 'sigmoid' if self.output_maps == 1 else output_act
         # Output has a fixed data type as to avoid numeric stability issues when training with a mixed-precision policy.
         self.thr = Conv2D(self.output_maps, (1,1), dtype=tf.float32, **param)
 

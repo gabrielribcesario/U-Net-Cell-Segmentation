@@ -1,0 +1,27 @@
+#!/bin/bash
+
+fetch_data() {
+    URL="$1"
+    DIR="$2"
+    mkdir -p $DIR
+    cd "$DIR"
+    if ! [ -f "DIC-C2DH-HeLa.zip" ]; then
+        wget $URL
+    fi
+    unzip "DIC-C2DH-HeLa.zip"
+    mv "DIC-C2DH-HeLa/"* .
+    rm -rf "DIC-C2DH-HeLa.zip" "DIC-C2DH-HeLa"
+    cd ..
+}
+
+TRAIN_URL="http://data.celltrackingchallenge.net/training-datasets/DIC-C2DH-HeLa.zip"
+TRAIN_DIR="DIC-C2DH-HeLa-Train"
+fetch_data "$TRAIN_URL" "$TRAIN_DIR"
+
+TEST_URL="http://data.celltrackingchallenge.net/test-datasets/DIC-C2DH-HeLa.zip"
+TEST_DIR="DIC-C2DH-HeLa-Test"
+fetch_data "$TEST_URL" "$TEST_DIR"
+
+mkdir -p TFRecords TFCache
+
+python -m create_tfrecord

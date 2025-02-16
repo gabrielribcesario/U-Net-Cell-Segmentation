@@ -42,7 +42,8 @@ class UNetHelper:
             # Unweighted loss.
             obj_loss = self.loss_func(y, pred)
             # Average weighted loss.
-            avg_loss = tf.nn.compute_average_loss(obj_loss, sample_weight=sw) / tf.cast(tf.math.reduce_prod(obj_loss.shape[1:]), tf.float32)
+            avg_loss = tf.nn.compute_average_loss(obj_loss, sample_weight=sw)
+            avg_loss /= tf.cast(tf.math.reduce_prod(tf.shape(obj_loss)[1:]), tf.float32) # image size scaling
             # Regularization loss (i.e. L1 and/or L2 regularization).
             reg_loss = self.model.losses
             if reg_loss: 
@@ -58,7 +59,8 @@ class UNetHelper:
         pred = self.model(X, training=False)
         # Average loss calculation.
         obj_loss = self.loss_func(y, pred)
-        avg_loss = tf.nn.compute_average_loss(obj_loss) / tf.cast(tf.math.reduce_prod(obj_loss.shape[1:]), tf.float32)
+        avg_loss = tf.nn.compute_average_loss(obj_loss)
+        avg_loss /= tf.cast(tf.math.reduce_prod(tf.shape(obj_loss)[1:]), tf.float32) # image size scaling
         return avg_loss, self.val_sca(y, pred)
 
     @tf.function
