@@ -22,6 +22,6 @@ TEST_URL="http://data.celltrackingchallenge.net/test-datasets/DIC-C2DH-HeLa.zip"
 TEST_DIR="DIC-C2DH-HeLa-Test"
 fetch_data "$TEST_URL" "$TEST_DIR"
 
-mkdir -p TFRecords TFCache
+mkdir -p TFRecords TFCache Predictions
 
 python -m create_tfrecord
